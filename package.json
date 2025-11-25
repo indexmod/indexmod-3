@@ -1,0 +1,14 @@
+{
+  "name": "indexmod-3",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "generate": "node ./src/cli.js generate ./raw/david-bowie.md"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.0.0",
+    "handlebars": "^4.7.7",
+    "js-yaml": "^4.1.0"
+  }
+}
