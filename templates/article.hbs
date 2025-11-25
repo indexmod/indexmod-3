@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{title}}</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 40px auto; line-height: 1.6; }
+    img { max-width: 100%; }
+  </style>
+</head>
+<body>
+  <h1>{{title}}</h1>
+  {{#if image}}
+    <img src="{{image}}" alt="{{title}}">
+  {{/if}}
+  <div>{{{content}}}</div>
+  <h3>Sources:</h3>
+  <ul>
+    {{#each sources}}
+      <li><a href="{{this}}" target="_blank">{{this}}</a></li>
+    {{/each}}
+  </ul>
+</body>
+</html>
