@@ -1,50 +1,70 @@
-import fs from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
-import Handlebars from 'handlebars';
-import dotenv from 'dotenv';
+import fs from "fs";
+import path from "path";
+import Handlebars from "handlebars";
+import { Configuration, OpenAIApi } from "openai";
+import dotenv from "dotenv";
+
 dotenv.config();
 
-export async function generateArticle(filePath) {
-  // 1. Читаем raw файл
-  const rawContent = fs.readFileSync(filePath, 'utf8');
-  const data = yaml.load(rawContent);
+const openai = new OpenAIApi(new Configuration({
+  apiKey: process.env.OPENAI_API_KEY
+}));
 
-  // 2. Подставляем контент (пока заглушка)
-  const articleData = {
-    title: data.title_hint,
-    image: `assets/${data.id}.jpg`, // заглушка для картинки
-    content: `<p>Автоматически сгенерированный текст для ${data.title_hint}.</p>`,
-    sources: data.source_urls
-  };
+export async function generateArticle(mdPath) {
+  const name = path.basename(mdPath, ".md");
 
-  // 3. Загружаем шаблон
-  const templateSource = fs.readFileSync(path.resolve('templates/article.hbs'), 'utf8');
-  const template = Handlebars.compile(templateSource);
-  const html = template(articleData);
+  // Читаем шаблон
+  const templateStr = fs.readFileSync(path.resolve("./templates/article.hbs"), "utf-8");
+  const template = Handlebars.compile(templateStr);
 
-  // 4. Сохраняем HTML в public/
-  const outputPath = path.resolve('public', `${data.id}.html`);
-  fs.writeFileSync(outputPath, html, 'utf8');
-  console.log(`Article generated: ${outputPath}`);
+  // Генерируем текст с LLM
+  const prompt = `Сделай статью по файлу ${name} в формате HTML с заголовком "${name}", фото и ссылками на источники.`;
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: prompt }]
+  });
 
-  // 5. Обновляем индекс
-  updateIndex(data.id, data.title_hint);
+  const content = response.choices[0].message.content;
+
+  // Генерируем HTML
+  const html = template({ title: name, content });
+
+  const outPath = path.resolve("./public", `${name}.html`);
+  fs.writeFileSync(outPath, html);
+  console.log("Article generated:", outPath);
 }
+import fs from "fs";
+import path from "path";
+import Handlebars from "handlebars";
+import { Configuration, OpenAIApi } from "openai";
+import dotenv from "dotenv";
 
-function updateIndex(id, title) {
-  const indexPath = path.resolve('public', 'index.html');
-  let indexContent = '';
-  if (fs.existsSync(indexPath)) {
-    indexContent = fs.readFileSync(indexPath, 'utf8');
-  } else {
-    indexContent = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Indexmod Articles</title></head><body><h1>Articles</h1><ul></ul></body></html>`;
-  }
+dotenv.config();
 
-  const listStart = indexContent.indexOf('<ul>');
-  const listEnd = indexContent.indexOf('</ul>');
-  const list = indexContent.slice(listStart + 4, listEnd);
-  const newList = list + `<li><a href="${id}.html">${title}</a></li>`;
-  const newIndex = indexContent.slice(0, listStart + 4) + newList + indexContent.slice(listEnd);
-  fs.writeFileSync(indexPath, newIndex, 'utf8');
+const openai = new OpenAIApi(new Configuration({
+  apiKey: process.env.OPENAI_API_KEY
+}));
+
+export async function generateArticle(mdPath) {
+  const name = path.basename(mdPath, ".md");
+
+  // Читаем шаблон
+  const templateStr = fs.readFileSync(path.resolve("./templates/article.hbs"), "utf-8");
+  const template = Handlebars.compile(templateStr);
+
+  // Генерируем текст с LLM
+  const prompt = `Сделай статью по файлу ${name} в формате HTML с заголовком "${name}", фото и ссылками на источники.`;
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: prompt }]
+  });
+
+  const content = response.choices[0].message.content;
+
+  // Генерируем HTML
+  const html = template({ title: name, content });
+
+  const outPath = path.resolve("./public", `${name}.html`);
+  fs.writeFileSync(outPath, html);
+  console.log("Article generated:", outPath);
 }
