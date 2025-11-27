@@ -1,59 +1,27 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IndexMod Generator</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 40px 20px;
-      line-height: 1.6;
-    }
-    h1 {
-      margin-bottom: 20px;
-    }
-    #output {
-      white-space: pre-wrap;
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 8px;
-      background: #fafafa;
-      margin-top: 20px;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>IndexMod Articles</title>
 </head>
-
 <body>
-  <h1>IndexMod Viewer</h1>
+  <h1>Все статьи</h1>
+  <ul id="articles-list"></ul>
 
-  <p>Загрузите YAML-файл, чтобы увидеть результат.</p>
-
-  <input id="fileInput" type="file" accept=".yaml,.yml" />
-
-  <div id="output">Здесь появится результат…</div>
-
-  <script type="module">
-    import yaml from "https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.mjs";
-
-    const fileInput = document.getElementById("fileInput");
-    const output = document.getElementById("output");
-
-    fileInput.addEventListener("change", async (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const text = await file.text();
-
-      try {
-        const data = yaml.load(text);
-        output.textContent = JSON.stringify(data, null, 2);
-      } catch (e) {
-        output.textContent = "Ошибка при чтении YAML:\n" + e.message;
-      }
-    });
+  <script>
+    async function loadArticles() {
+      const files = ["david-bowie.html"]; // позже можно генерировать динамически через JS или GitHub Actions
+      const ul = document.getElementById("articles-list");
+      files.forEach(file => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = file;
+        a.textContent = file.replace(".html", "");
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+    }
+    loadArticles();
   </script>
 </body>
 </html>

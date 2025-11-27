@@ -1,4 +1,24 @@
-git add .github/workflows/generate-pages.yml
-git commit -m "Add GitHub Actions workflow for auto-generation"
-git push origin main
+name: Generate Pages
 
+on:
+  push:
+    paths:
+      - 'raw/**'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: npm install
+      - run: node src/cli.js generate raw/*.md
+      - run: git config --global user.name "indexmod"
+      - run: git config --global user.email "indexmod@example.com"
+      - run: git add public/*.html
+      - run: git commit -m "Auto-generate articles [skip ci]" || echo "No changes"
+      - run: git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.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 }}
